@@ -1,0 +1,145 @@
+//********************************************************************
+                    // Technique 1 : moyennage des points de l'ensemble
+                    //********************************************************************
+                    #ifdef Technique1
+                        if(!valid_points.empty()){
+                            float factor = 1.0/(float)valid_points.size();
+                            vect21 sum; sum(0,0) = 0.0; sum(1,0) = 0.0;
+                            while (!valid_points.empty()){
+                                sum = sum + valid_points.back();
+                                valid_points.pop_back();
+                            }
+                            cluster = factor * sum;
+                            beacon_mesure.x = cluster(0,0);
+                            beacon_mesure.y = cluster(1,0); //+Rayon;
+                            beacon_mesure.z = i;
+
+                            beacon_mesure_pub.publish(beacon_mesure);
+                        }
+                    #endif /* Technique1 */
+
+                    //********************************************************************
+                    // Technique 2 : extraction des centres par tout combinaison de 3 points
+                    //********************************************************************
+                    #ifdef Technique2
+                        std::vector<vect21> valid_centers;
+                        valid_centers.clear();
+                        if(valid_points.size()>=3){
+                            for(int n = 0 ; n < valid_points.size() ; n++){
+                                for(int m = n+1 ; m < valid_points.size() ; m++){
+                                    for(int p = m+1 ; p < valid_points.size() ; p++){
+                                        vect21 center; center(0,0) = 0.0; center(1,0) = 0.0;
+                                        float x1 = valid_points[n](0,0);
+                                        float x2 = valid_points[m](0,0);
+                                        float x3 = valid_points[p](0,0);
+                                        float y1 = valid_points[n](1,0);
+                                        float y2 = valid_points[m](1,0);
+                                        float y3 = valid_points[p](1,0);
+                                        float x1sq = pow(x1,2.0);
+                                        float x2sq = pow(x2,2.0);
+                                        float x3sq = pow(x3,2.0);
+                                        float y2sq = pow(y1,2.0);
+                                        float y1sq = pow(y2,2.0);
+                                        float y3sq = pow(y3,2.0);
+
+                                        float a = -(x2-x1)/(y2-y1);
+                                        float b = (x2sq - x1sq + y2sq - y1sq)/(2.0*(y2-y1));
+                                        float c = -(x3-x2)/(y3-y2);
+                                        float d = (x3sq - x2sq + y3sq - y2sq)/(2.0*(y3-y2));
+
+                                        center(0,0) = (d-b)/(a-c);
+                                        center(1,0) = a*center(0,0)+b;
+                                        valid_centers.push_back(center);
+                                    }
+                                }
+                            }
+                        }
+
+                        #ifdef DisplayOn
+                            int lin = i + 45;
+                            printf("\033[%i;0HFrom main : number of valid center for beacon %i = %i\033[K\n", lin, i, (int)valid_centers.size());
+                        #endif /* DisplayOn */
+
+                        if(!valid_centers.empty()){
+                            float factor = 1.0/(float)valid_centers.size();
+                            vect21 sum; sum(0,0) = 0.0; sum(1,0) = 0.0;
+                            while (!valid_centers.empty()){
+                                sum = sum + valid_centers.back();
+                                valid_centers.pop_back();
+                            }
+                            cluster = factor * sum;
+                            beacon_mesure.x = cluster(0,0);
+                            beacon_mesure.y = cluster(1,0); //+beacon_radius;
+                            beacon_mesure.z = i;
+
+                            beacon_mesure_pub.publish(beacon_mesure);
+                        }
+                    #endif /* Technique2 */
+
+                    //********************************************************************
+                    // Technique 3 : extraction des centres avec 2 point extrème et le point milieu
+                    //********************************************************************
+                    #ifdef Technique3
+                        std::vector<vect21> valid_centers;
+                        valid_centers.clear();
+                        vect21 center; center(0,0) = 0.0; center(1,0) = 0.0;
+                        if(valid_points.size()>=3){
+                            float x1 = valid_points[0](0,0);
+                            float x2 = valid_points[valid_points.size()/2](0,0);
+                            float x3 = valid_points[valid_points.size()-1](0,0);
+                            float y1 = valid_points[0](1,0);
+                            float y2 = valid_points[valid_points.size()/2](1,0);
+                            float y3 = valid_points[valid_points.size()-1](1,0);
+                            float x1sq = pow(x1,2.0);
+                            float x2sq = pow(x2,2.0);
+                            float x3sq = pow(x3,2.0);
+                            float y2sq = pow(y1,2.0);
+                            float y1sq = pow(y2,2.0);
+                            float y3sq = pow(y3,2.0);
+
+                            float a = -(x2-x1)/(y2-y1);
+                            float b = (x2sq - x1sq + y2sq - y1sq)/(2.0*(y2-y1));
+                            float c = -(x3-x2)/(y3-y2);
+                            float d = (x3sq - x2sq + y3sq - y2sq)/(2.0*(y3-y2));
+
+                            center(0,0) = (d-b)/(a-c);
+                            center(1,0) = a*center(0,0)+b;
+                            valid_centers.push_back(center);
+                        }
+
+                        #ifdef DisplayOn
+                            int lin = i + 45;
+                            printf("\033[%i;0HFrom main : number of valid center for beacon %i = %i\033[K\n", lin, i, (int)valid_centers.size());
+                        #endif /* DisplayOn */
+
+                        if(!valid_centers.empty()){
+                            float factor = 1.0/(float)valid_centers.size();
+                            vect21 sum; sum(0,0) = 0.0; sum(1,0) = 0.0;
+                            while (!valid_centers.empty()){
+                                sum = sum + valid_centers.back();
+                                valid_centers.pop_back();
+                            }
+                            cluster = factor * sum;
+                            beacon_mesure.x = cluster(0,0);
+                            beacon_mesure.y = cluster(1,0); //+Rayon;
+                            beacon_mesure.z = i;
+                            beacon_mesure_pub.publish(beacon_mesure);
+                        }
+                    #endif /* Technique3 */
+
+                    //********************************************************************
+                    // Technique 4 : calcul du point centrale + rayon
+                    //********************************************************************
+
+                    #ifdef Technique4
+                        if(!valid_points.empty()){
+                            float x_central = valid_points[valid_points.size()/2](0,0);
+                            float y_central = valid_points[valid_points.size()/2](1,0);
+                            float L_centre = sqrt(pow(x_central,2.0) + pow(y_central,2.0)) + Rayon ;
+                            float theta_centre = atanf(y_central/x_central);
+                            beacon_mesure.x = L_centre*cos(theta_centre);
+                            beacon_mesure.y = L_centre*sin(theta_centre);
+                            beacon_mesure.z = i;
+                            beacon_mesure_pub.publish(beacon_mesure);
+                        }
+                    #endif /* Technique4 */
