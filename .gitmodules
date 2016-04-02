@@ -1,3 +1,6 @@
 [submodule "catkin_ws/src/hokuyo_node"]
 	path = catkin_ws/src/hokuyo_node
 	url = https://github.com/ros-drivers/hokuyo_node.git
+[submodule "catkin_ws/src/joystick_drivers"]
+	path = catkin_ws/src/joystick_drivers
+	url = https://github.com/unusual-thoughts/joystick_drivers.git
