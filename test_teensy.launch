@@ -1,0 +1,5 @@
+<launch>
+ <node name="Teensy_Bridge" pkg="rosserial_python" type="serial_node.py" args="/dev/teensy" output="screen">
+ <param name="baud" value="115200"/>
+ </node>
+</launch>

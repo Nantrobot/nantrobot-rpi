@@ -1,0 +1,26 @@
+<launch>
+
+  <node pkg="absolute_location" type="absolute_location" name="absolute_location" >
+  </node>
+
+
+ <node pkg="hokuyo_node" type="hokuyo_node" name="hokuyo"  output="screen" >
+   <param name="calibrate_time" type="bool"  value="true" />
+   <param name="port" type="string" value="/dev/hokuyo" />
+   <param name="intensity" type="bool" value="false" />
+   <param name="skip" type="int" value="0" />
+   <param name="frame_id" type="string" value="hokuyo_frame" />
+   <param name="cluster" type="int" value="0" />
+   <param name="min_angle" type="double" value="-2.094" />
+   <param name="max_angle" type="double" value="2.094" />
+   <param name="allow_unsafe_settings" type="bool" value="false" />
+ </node>
+
+
+</launch>
+
+
+
+
+
+
