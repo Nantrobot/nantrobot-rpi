@@ -28,6 +28,7 @@
 #include <geometry_msgs/Pose2D.h>        // used to hold the pose of the robot in the map
 #include <geometry_msgs/Point32.h>       // used to hold the beacon position in the robot frame "Mesure_Kalman"
 #include <sensor_msgs/LaserScan.h>       // used to hold all the beacon valid point in laserScan and the laserScan of the Hokuyo
+#include <tf/transform_broadcaster.h>
 
 #include <sstream>
 
@@ -337,6 +338,10 @@ int main(int argc, char **argv)
         ros::Publisher beacon2_laserscan_pub = n.advertise<sensor_msgs::LaserScan>("scan_beacon2", 1);       // to display on RVIZ
         ros::Publisher beacon3_laserscan_pub = n.advertise<sensor_msgs::LaserScan>("scan_beacon3", 1);       // to display on RVIZ
         ros::Publisher obstacle_laserscan_pub = n.advertise<sensor_msgs::LaserScan>("scan_obstacle", 1);     // to display on RVIZ
+        // Broadcast location of hokuyo_frame
+        tf::Transform hokuyo_frame;
+        tf::Quaternion hokuyo_quat;
+        tf::TransformBroadcaster hokuyo_frame_br;
     #endif /* DisplayOn */
 
     //********************************************************************
@@ -592,6 +597,12 @@ int main(int argc, char **argv)
                     beacon2_laserscan_pub.publish(beacon2_laserscan);
                     beacon3_laserscan_pub.publish(beacon3_laserscan);
                     obstacle_laserscan_pub.publish(obstacle_laserscan);
+                    // Publish hokuyo_frame
+                    hokuyo_frame.setOrigin(tf::Vector3(pose_x, pose_y, 0.));
+                    hokuyo_quat.setRPY(0., 0., pose_theta);
+                    hokuyo_frame.setRotation(hokuyo_quat);
+                    hokuyo_frame_br.sendTransform(tf::StampedTransform(hokuyo_frame, ros::Time::now(),
+                        "world", "hokuyo_frame"));
                 #endif /* DisplayOn */
 
                 fresh_estimation = false; fresh_scan = false;
