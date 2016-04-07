@@ -598,7 +598,7 @@ int main(int argc, char **argv)
                     beacon3_laserscan_pub.publish(beacon3_laserscan);
                     obstacle_laserscan_pub.publish(obstacle_laserscan);
                     // Publish hokuyo_frame
-                    hokuyo_frame.setOrigin(tf::Vector3(pose_x, pose_y, 0.));
+                    hokuyo_frame.setOrigin(tf::Vector3(pose_x / 1000., pose_y / 1000., 0.));
                     hokuyo_quat.setRPY(0., 0., pose_theta);
                     hokuyo_frame.setRotation(hokuyo_quat);
                     hokuyo_frame_br.sendTransform(tf::StampedTransform(hokuyo_frame, ros::Time::now(),
