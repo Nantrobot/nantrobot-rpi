@@ -1,0 +1,6 @@
+image: carte_gris.png
+resolution: 0.001
+origin: [-0.103390, -0.135280, 0.0]
+occupied_thresh: 0.6
+free_thresh: 0.2
+negate: 0

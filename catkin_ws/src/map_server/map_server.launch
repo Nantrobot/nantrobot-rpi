@@ -1,0 +1,8 @@
+<launch>
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find map_server)/map_server_conf.yaml">
+    <param name="frame_id" type="string" value="world" />	
+  </node>
+</launch>
+
+
+
