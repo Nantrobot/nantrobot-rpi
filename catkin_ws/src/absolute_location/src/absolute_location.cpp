@@ -70,7 +70,7 @@ typedef struct{
 //********************************************************************
 const float longueur=3000;              // longueur du terrain en mm
 const float largeur=2000;               // largeur du terrain en mm
-const float Rayon=30;                   // rayon de la beacon en mm
+const float Rayon=35;                   // rayon de la beacon en mm
 const float x_hokuyo = -30;             // déportation selon x de l'hokuyo dans le repère robot en mm
 const float y_hokuyo = -5;               // déportation selon y de l'hokuyo dans le repère robot en mm
 const float deportation_angle = 0.0267;
