@@ -40,7 +40,7 @@ float Hres,Lres;
 //Interpolation parameters
 double f;//fréquence d'envoi du générateur de trajectoires
 double tf;//temps de mouvement pour avancer de 14mm (sqrt(2)*resolution)
-int n=10;//nombre de points de passage
+int n=20;//nombre de points de passage
 float xcprev,ycprev;
 
 
