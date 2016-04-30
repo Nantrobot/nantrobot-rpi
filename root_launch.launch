@@ -30,12 +30,17 @@
 <node pkg="motion_planning" type="motion_planning_node" name="motion_planning" >
 </node>
 
-<node pkg="joy" type="joy_node" name="JoyStick" >
-  <param name="dev" type="string" value="/dev/input/js0" />
-</node> 
+<!--node pkg="joy" type="joy_node" name="JoyStick" -->
+<!--  param name="dev" type="string" value="/dev/input/js0" /-->
+<!--/node--> 
 
-<node pkg="joy_controller" type="joy_controller_node" name="joyControler" >
-</node>  -->
+<!--node pkg="joy_controller" type="joy_controller_node" name="joyControler" -->
+<!--/node-->  -->
+
+<!-- Map pour rviz -->
+<node pkg="map_server" type="map_server" name="map_server" args="$(find map_server)/map_server_conf.yaml">
+  <param name="frame_id" type="string" value="world" />	
+</node>
 
 
 </launch>
