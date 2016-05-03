@@ -1,9 +1,15 @@
+//C++ Libraries
+#include<iostream>
+#include<stdlib.h>
+#include<vector>
+#include<string>
+
 #include "StateMachine.h"
 
 using namespace std;
 
 
-class Listener {
+/*class Listener {
 public : geometry_msgs::Pose2D last_msg_Pose2D;
 public :
     // ?? _msgs:: ?? last_msg_ ?? ?;
@@ -18,65 +24,125 @@ Listener listener_Depart;
 Listener listener_Pose;
 Listener listener_Poisson;
 Listener listener_motion;
+*/
 
-
+//Config ROS
 ros::init(argc, argv, "display_node");
 ros::NodeHandle nh;
-// Ros::Subscriber sub_LaserScan = nh.subscribe("scan", 1, & Listener::Callback_LaserScan, & listener_LaserScan);
-ros::Subscriber sub_Pose = nh.subscribe("Pose", 1, & Listener::Callback_Pose, & listener_Pose);
+ros::Subscriber sub_CapteurFront = nh.subscribe("capteurFront", 1, CapteurFront_Callback);
+ros::Subscriber sub_CapteurBack = nh.subscribe("capteurBack", 1, CapteurBack_Callback);
+ros::Subscriber sub_Pose = nh.subscribe("Pose", 1, Pose_Callback);
 
-
-ros::Publisher pubcom = nh.advertise<geometry_msg::Point32>("PointCons", 1000);
+ros::Publisher pubcons = nh.advertise<geometry_msg::Point32>("PointCons", 1000);
+ros::Publisher pubwavcons = nh.advertise<std_msgs::Point32>("WavConsPosition", 1000);
 ros::Publisher pubbras = nh.advertise<geometry_msgs::Twist>("UarmCommand", 1000);
 ros::Publisher pubpince = nh.advertise<std_msgs::String>("FrontPlierCommand", 1000);
 ros::Publisher pubpincebras = nh.advertise<std_msgs::Int16>("GripperCommand", 1000);
 ros::Publisher pubparasol = nh.advertise<std_msgs::Empty>("ParasolCommand", 1000);
 
-geometry_msg::Point32 cmd;
+geometry_msg::Point32 cmd_Pos;
+geometry_msg::Twist cmd_Bras;
 
 
 ros::Rate loop_rate(100);
 
-// Machine dÈterministe (plan A)
+//Configuration environment
+char* pPath;
+pPath = getenv("TEAM");
+if(strcmp(pPath,"purple")==0){
+    
+
+// Machine d√©terministe (plan A)
 void State100(State* S) {
 
     cout << "state100" << endl;
     cout << "pret a partir!" << endl; // Etat initial on attend le signal de depart
-    if (listener_Depart.test_Pose) {
-        if listener_Depart.last_msg_Pose {
-        ros::Time begin = ros::Time::now(); // On initialise le temps de depart
+    if (Depart) {
+         {
+            ros::Time begin = ros::Time::now(); // On initialise le temps de depart
             ros::Time last_state = begin; // A chaque noeud on enregistre le temps
-            S->setTransition("depart", true); // On modifie les conditions des transitions iÁi
+            S->setTransition("depart", true); // On modifie les conditions des transitions i√ßi
         }
     }
 }
 
+void State150(State* S){
+    cout << "state150" << endl;
+    cout << "Sortie de la zone d'obstacle!" << endl;
+    
+    pubpince.publish("depart");
+    //Avanc√©e du robot en L, Th√™ta
+    cmd_Pos.x = 10;
+    cmd_Pos.y = 10;
+    cmd_Pos.z = 1;
+    pubcons.publish(cmd_Pos);
+    cmd_Pos.x = 10;
+    cmd_Pos.y = 0;
+    cmd_Pos.z = 1;
+    for (int i=0; i<14; i++)
+    {
+        pubcons.publish(cmd_Pos);
+        ros::Duration(0.01).sleep(); // Attend 10ms avant la nouvelle boucle
+    }
+    S->setTransition("reach150", true); // On modifie les conditions des transitions i√ßi
+}
+
 void State200(State* S) {
     cout << "state200" << endl;
-    cout << "ruÈe vers le sable!" << endl;
+    cout << "Pouss√©e premiers cubes de sable!" << endl;
+
+    // On commande le robot vers les cubes
+    cmd_Pos.x = 10;
+    cmd_Pos.y = -10;
+    cmd_Pos.z = 1;
+    pubcom.publish(cmd_Pos);
+    cmd_Pos.x = 10;
+    cmd_Pos.y = 0;
+    cmd_Pos.z = 1;
+    for (int i=0; i<60; i++)
+    {
+        pubcons.publish(cmd_Pos);
+        ros::Duration(0.01).sleep(); // Attend 10ms avant la nouvelle boucle
+    }
+    
+    //sortie de la zone d'obstacle
+    cmd_Pos.x = -10;
+    cmd_Pos.y = 0;
+    cmd_Pos.z = 1;
+    for (int i=0; i<60; i++)
+    {
+        pubcons.publish(cmd_Pos);
+        ros::Duration(0.01).sleep(); // Attend 10ms avant la nouvelle boucle
+    }
+    S->setTransition("reach200");
+}
+
+void State250(State* S) {
+    cout << "state250" << endl;
+    cout << "ru√©e vers le sable!" << endl;
 
     // On commande le robot vers la dune
-    cmd.x = 450;
+    cmd_Pose.x = 450;
     cmd.y = 130;
     cmd.z = 0
     pubcom.publish(cmd);
 
     poseatteinte = fasle
-    while (!poseatteinte && (ros::Time::now() - last_state) < 10) { // Tant qu'on est pas arrivÈ et qu'on a pas fait 10s
-        if (listener_motion.last_msg ?? ? ) { // Si le topic motion indique su'on est arrivÈ
+    while (!poseatteinte && (ros::Time::now() - last_state) < 10) { // Tant qu'on est pas arriv√© et qu'on a pas fait 10s
+        if (listener_motion.last_msg ?? ? ) { // Si le topic motion indique su'on est arriv√©
             poseatteinte = true;
         }
-        // On indique qu'on est arrivÈ
-        if (listener_motion.last_msg ?? ? ) { // Si robot detectÈ
-            ros::Time tempsetat = (ros::Time::now() - last_state); // Temps parcouru par l'Ètat 200
-            if (tempetat < 5 ) {S->setTransition("planC", true); } // Si on voit le robot avant les 5premiËres secondes (‡ modifier selon test)
+        // On indique qu'on est arriv√©
+        if (listener_motion.last_msg ?? ? ) { // Si robot detect√©
+            ros::Time tempsetat = (ros::Time::now() - last_state); // Temps parcouru par l'√©tat 200
+            if (tempetat < 5 ) {S->setTransition("planC", true); } // Si on voit le robot avant les 5premi√®res secondes (√† modifier selon test)
             if (tempetat < 10 ) {S->setTransition("planB", true); } // Pareil mais 10
-            // Peut etre faire un 4Ëme cas
+            // Peut etre faire un 4√®me cas
         }
         ros::Duration(0.1).sleep(); // Attend 100ms avant la nouvelle boucle
 
     }
-    S->setTransition("planA", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("planA", true); // On modifie les conditions des transitions i√ßi
 
 }
 
@@ -86,7 +152,7 @@ void State300(State* S) {
     cout << "approche lente" << endl;
     // Approche lente en L theta pour se rapprocher des blocs
 
-    while (!poseatteinte && (ros::Time::now() - last_state) < 3) { // Tant que l'on est pas arrivÈ et durant au maximum 3s
+    while (!poseatteinte && (ros::Time::now() - last_state) < 3) { // Tant que l'on est pas arriv√© et durant au maximum 3s
         cmd.x = 2 ;
         cmd.y = 0.2;
         cmd.z = 1;
@@ -98,7 +164,7 @@ void State300(State* S) {
         }
     }
 
-    S->setTransition("reach300", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach300", true); // On modifie les conditions des transitions i√ßi
 
 }
 void State400(State* S) {
@@ -119,7 +185,7 @@ void State400(State* S) {
     pubcom.publish(cmd);
     }
     if "a completer" {
-    S->setTransition("reach400", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach400", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State500(State* S) {
@@ -133,7 +199,7 @@ void State500(State* S) {
 
     if "a completer" {
 
-    S->setTransition("reach500", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach500", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State600(State* S) {
@@ -146,7 +212,7 @@ void State600(State* S) {
     pubcom.publish(cmd);// On publie la commande
 
     if "a completer" {
-    S->setTransition("reach600", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach600", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State700(State* S) {
@@ -160,7 +226,7 @@ void State700(State* S) {
 
     if "a completer" {
 
-    S->setTransition("reach700", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach700", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State800(State* S) {
@@ -174,7 +240,7 @@ void State800(State* S) {
 
     if "a completer" {
 
-    S->setTransition("reach800", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach800", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State900(State* S) {
@@ -198,7 +264,7 @@ void State900(State* S) {
     pubcom.publish(cmd);
 
 
-        S->setTransition("reach900", true); // On modifie les conditions des transitions iÁi
+        S->setTransition("reach900", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1000(State* S) {
@@ -212,7 +278,7 @@ void State1000(State* S) {
 
     if "a completer" {
 
-    S->setTransition("reach1000", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach1000", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1100(State* S) {
@@ -220,8 +286,8 @@ void State1100(State* S) {
 
     cout << "state1100" << endl;
     cout << "cherche poissons marche avant" << endl;
-    // On cherche les poissons en marche arriËre
-    // Il faura peut etre activer le bras pour positionnner la camÈra
+    // On cherche les poissons en marche arri√®re
+    // Il faura peut etre activer le bras pour positionnner la cam√©ra
     while (i < 150) { // On envoie des commandes de 2mm par 2mm en marche avant
         cmd.x = 2 ;
         cmd.y = 1.7;
@@ -233,14 +299,14 @@ void State1100(State* S) {
         }// On publie la commande
     }
     if "a completer" {
-    S->setTransition("paspoisson", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("paspoisson", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1100bis(State* S) {
     cout << "state1100bis" << endl;
     cout << "cherche poissons marche arriere" << endl;
-// Pareil en marche arriËre
-    while (i < 150) { // On envoie des commandes de 2mm par 2mm en marche arriËre
+// Pareil en marche arri√®re
+    while (i < 150) { // On envoie des commandes de 2mm par 2mm en marche arri√®re
         cmd.x = -2 ;
         cmd.y = 1.7;
         cmd.z = 1;
@@ -251,7 +317,7 @@ void State1100bis(State* S) {
         }// On publie la commande
     }
     if "a completer" {
-    S->setTransition("paspoisson", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("paspoisson", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1110(State* S) {
@@ -267,7 +333,7 @@ void State1110(State* S) {
     // Voir comment fonctionne le bras etc
 
     if "a completer" {
-    S->setTransition("getpoisson", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("getpoisson", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1120(State* S) {
@@ -280,7 +346,7 @@ void State1120(State* S) {
     cmd.z = 1;
     pubcom.publish(cmd);
     if "a completer" {
-    S->setTransition("reachfilet ", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reachfilet ", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1130(State* S) {
@@ -296,7 +362,7 @@ void State1130(State* S) {
     pubbras.publish(cmdbras);
     nb_poissons ++;
     if "a completer" {
-    S->setTransition("poissondepose ", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("poissondepose ", true); // On modifie les conditions des transitions i√ßi
     }
     if (nb_poissons == 4) {
         S->setTransition("finilapeche ", true);
@@ -313,7 +379,7 @@ void State1200(State* S) {
 
     if "a completer" {
 
-    S->setTransition("reach1200", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach1200", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1300(State* S) {
@@ -331,7 +397,7 @@ void State1300(State* S) {
     pubcom.publish(cmd);
     }
     if "a completer" {
-    S->setTransition("reach1300", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach1300", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1400(State* S) {
@@ -348,7 +414,7 @@ void State1400(State* S) {
     pubcom.publish(cmd);
     }
     if "a completer" {
-    S->setTransition("reach1400", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach1400", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1500(State* S) {
@@ -361,7 +427,7 @@ void State1500(State* S) {
 
     if ("a completer") {
 
-        S->setTransition("reach1500", true); // On modifie les conditions des transitions iÁi
+        S->setTransition("reach1500", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1600(State* S) {
@@ -375,7 +441,7 @@ void State1600(State* S) {
 
     if "a completer" {
 
-    S->setTransition("reach1600", true); // On modifie les conditions des transitions iÁi
+    S->setTransition("reach1600", true); // On modifie les conditions des transitions i√ßi
     }
 }
 void State1700(State* S) {
@@ -393,7 +459,7 @@ void State1700(State* S) {
     pubcom.publish(cmd);
     }
     cout << "c'est la fin" << endl;
-    // Il reste ‡ gÈrer le temps et les pauses!
+    // Il reste √† g√©rer le temps et les pauses!
 }
 
 // Plan B
@@ -407,7 +473,7 @@ int main() {
     // //BUILD STATE MACHINE// /// /// /// /
 
     depart du robot!
-    // Les Ètats deterministes
+    // Les √©tats deterministes
     State* S100 = new State(&State100);
     State* S200 = new State(&State200);
     State* S300 = new State(&State300);
@@ -430,11 +496,13 @@ int main() {
     State* S1130 = new State(&State1130);
     State* S1700 = new State(&State1700);
 
-    // On rajoute les transitions vers les Ètats// /// //
+    // On rajoute les transitions vers les √©tats// /// //
 
     // Transition de depart du robot
-    S100->addTransition("depart", S200);
-    S200->addTransition("reach200", S300);
+    S100->addTransition("depart", S150);
+    S150->addTransition("reach150", S200);
+    S200->addTransition("reach200", S250);
+    S250->addTransition("reach250", S300);
     S300->addTransition("reach300", S400);
     S400->addTransition("reach400", S500);
     S500->addTransition("reach500", S600);
@@ -464,22 +532,22 @@ int main() {
 
 
 
-    // On spÈcifie un nom pour la transition et un pointeur vers un Ètat
+    // On sp√©cifie un nom pour la transition et un pointeur vers un √©tat
     /*one->addTransition("one2three",three);
     two->addTransition("two2three",three);
     three->addTransition("three2one",one);*/
-    // On instancie la machine d'Ètat finis// //
+    // On instancie la machine d'√©tat finis// //
     SM maMachine(one);
 
     // /// /// /// RUN STATE MACHINE// /// /// /// /// 
     for (int cnt = 0; cnt < 10; cnt++) {
         maMachine.run();
-        // Ne pas oublier que les conditions associÈes aux transitions sont modifiÈes dans les fonctions pointÈes (au dÈbut)
-        // C'est impÈratif pour changer d'Ètat...
-        // Ainsi la fonction de l'Ètat courant est exÈcutÈe autant de fois que maMachine.run() avant passage ‡ TRUE d'une condition
-        // La classe SM se charge de vÈrifier les transitions et d'effectuer tous les changements nÈcessaires ‡ chaque appel de maMachine.run()
-        // Avant l'exÈcution de la fonction cible
+        // Ne pas oublier que les conditions associ√©es aux transitions sont modifi√©es dans les fonctions point√©es (au d√©but)
+        // C'est imp√©ratif pour changer d'√©tat...
+        // Ainsi la fonction de l'√©tat courant est ex√©cut√©e autant de fois que maMachine.run() avant passage √† TRUE d'une condition
+        // La classe SM se charge de v√©rifier les transitions et d'effectuer tous les changements n√©cessaires √† chaque appel de maMachine.run()
+        // Avant l'ex√©cution de la fonction cible
     }
-    delete one; delete two; delete three; // On dÈsalloue tout ‡ la fin !
+    delete one; delete two; delete three; // On d√©salloue tout √† la fin !
     return (0);
 }
