@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#include <ros/ros.h>
+#include "ros/ros.h"
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Point32.h>
 #include <geometry_msgs/Pose2D.h>
@@ -680,24 +680,27 @@ void State1600(State* S) {
     cout << "state1600" << endl;
     cout << "ouverture Parasol" << endl;
     
-    pubparasol.publish();
+    pubparasol.publish(std_msgs::Empty());
     
     cout << "C'est fini ;)" << endl;
 }
 
+void State1700(State* S) {
+    // Dummy
+}
 
-int main() {
+int main(int argc, char **argv) {
     //Config ROS
     ros::init(argc, argv, "display_node");
     ros::NodeHandle nh;
-    sub_CapteurFront = nh.subscribe("capteurFront", 1, CapteurFront_Callback);
-    sub_CapteurBack = nh.subscribe("capteurBack", 1, CapteurBack_Callback);
-    sub_Pose = nh.subscribe("Pose", 1, Pose_Callback);
-    sub_Poisson = nh.subscribe("Poisson", 1, Poisson_Callback);
+    ros::Subscriber sub_CapteurFront = nh.subscribe("capteurFront", 1, CapteurFront_Callback);
+    ros::Subscriber sub_CapteurBack = nh.subscribe("capteurBack", 1, CapteurBack_Callback);
+    ros::Subscriber sub_Pose = nh.subscribe("Pose", 1, Pose_Callback);
+    ros::Subscriber sub_Poisson = nh.subscribe("Poisson", 1, Poisson_Callback);
 
     ros::Publisher pubphoto = nh.advertise<std_msgs::Empty>("Photo", 1000);
-    ros::Publisher pubcons = nh.advertise<geometry_msg::Point32>("PointCons", 1000);
-    ros::Publisher pubwavcons = nh.advertise<std_msgs::Point32>("WavConsPosition", 1000);
+    ros::Publisher pubcons = nh.advertise<geometry_msgs::Point32>("PointCons", 1000);
+    ros::Publisher pubwavcons = nh.advertise<geometry_msgs::Point32>("WavConsPosition", 1000);
     ros::Publisher pubbras = nh.advertise<geometry_msgs::Twist>("UarmCommand", 1000);
     ros::Publisher pubpince = nh.advertise<std_msgs::String>("FrontPlierCommand", 1000);
     ros::Publisher pubpincebras = nh.advertise<std_msgs::Int16>("GripperCommand", 1000);
@@ -780,7 +783,7 @@ int main() {
     two->addTransition("two2three",three);
     three->addTransition("three2one",one);*/
     // On instancie la machine d'état finis// //
-    SM maMachine(one);
+    SM maMachine(S100);
 
     // /// /// /// RUN STATE MACHINE// /// /// /// /// 
     for (int cnt = 0; cnt < 10; cnt++) {
@@ -791,6 +794,6 @@ int main() {
         // La classe SM se charge de vérifier les transitions et d'effectuer tous les changements nécessaires à chaque appel de maMachine.run()
         // Avant l'exécution de la fonction cible
     }
-    delete one; delete two; delete three; // On désalloue tout à la fin !
+    delete S100, S150, S200, S250, S300, S400, S500, S600, S700, S800, S900, S1000, S1100, S1200, S1210, S1220, S1230, S1240, S1300, S1400, S1500, S1600, S1700; // On désalloue tout à la fin !
     return (0);
 }
