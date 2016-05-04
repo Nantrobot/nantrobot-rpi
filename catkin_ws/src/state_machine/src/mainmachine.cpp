@@ -37,8 +37,16 @@ Listener listener_Pose;
 Listener listener_Poisson;
 Listener listener_motion;
 */
-;
-geometry_msg::Point32 pos;
+
+//Variables
+int frontWarning, backWarning;
+int poisson = 0;
+int orientationPince, xBras, yBras;    
+int nb_Poissons = 0;
+//ROS variables
+geometry_msgs::Point32 cmd_Pose;
+geometry_msgs::Twist cmd_Bras;
+geometry_msgs::Point32 pos;
 
 void CapteurFront_Callback (const std_msgs::Int16& cmd_msg){
     frontWarning=cmd_msg.data;
@@ -48,11 +56,11 @@ void CapteurBack_Callback (const std_msgs::Int16& cmd_msg){
     backWarning=cmd_msg.data;
 }
 
-void Pose_Callback (const geometry_msg::Point32& cmd_msg){
+void Pose_Callback (const geometry_msgs::Point32& cmd_msg){
     pos=cmd_msg.data;
 }
 
-void Poisson_Callback (const geometry_msg::Point32& cmd_msg){
+void Poisson_Callback (const geometry_msgs::Point32& cmd_msg){
     //A remplir
     poisson=1;
 }
@@ -67,15 +75,13 @@ ros::Subscriber sub_Pose = nh.subscribe("Pose", 1, Pose_Callback);
 ros::Subscriber sub_Poisson = nh.subscribe("Poisson", 1, Poisson_Callback);
 
 ros::Publisher pubphoto = nh.advertise<std_msgs::Empty>("Photo", 1000);
-ros::Publisher pubcons = nh.advertise<geometry_msg::Point32>("PointCons", 1000);
+ros::Publisher pubcons = nh.advertise<geometry_msgs::Point32>("PointCons", 1000);
 ros::Publisher pubwavcons = nh.advertise<std_msgs::Point32>("WavConsPosition", 1000);
 ros::Publisher pubbras = nh.advertise<geometry_msgs::Twist>("UarmCommand", 1000);
 ros::Publisher pubpince = nh.advertise<std_msgs::String>("FrontPlierCommand", 1000);
 ros::Publisher pubpincebras = nh.advertise<std_msgs::Int16>("GripperCommand", 1000);
 ros::Publisher pubparasol = nh.advertise<std_msgs::Empty>("ParasolCommand", 1000);
 
-geometry_msg::Point32 cmd_Pose;
-geometry_msg::Twist cmd_Bras;
 
 
 ros::Rate loop_rate(100);
@@ -699,10 +705,6 @@ void State1600(State* S) {
 
 
 int main() {
-    int frontWarning, backWarning;
-    int poisson = 0;
-    int orientationPince, xBras, yBras;    
-    int nb_Poissons = 0;
     // //BUILD STATE MACHINE// /// /// /// /
 
     depart du robot!
