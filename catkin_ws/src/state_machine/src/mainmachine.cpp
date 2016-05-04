@@ -695,8 +695,8 @@ int main(int argc, char **argv) {
     ros::Subscriber sub_Poisson = nh.subscribe("Poisson", 1, Poisson_Callback);
 
     ros::Publisher pubphoto = nh.advertise<std_msgs::Empty>("Photo", 1000);
-    ros::Publisher pubcons = nh.advertise<geometry_msg::Point32>("PointCons", 1000);
-    ros::Publisher pubwavcons = nh.advertise<std_msgs::Point32>("WavConsPosition", 1000);
+    ros::Publisher pubcons = nh.advertise<geometry_msgs::Point32>("PointCons", 1000);
+    ros::Publisher pubwavcons = nh.advertise<geometry_msgs::Point32>("WavConsPosition", 1000);
     ros::Publisher pubbras = nh.advertise<geometry_msgs::Twist>("UarmCommand", 1000);
     ros::Publisher pubpince = nh.advertise<std_msgs::String>("FrontPlierCommand", 1000);
     ros::Publisher pubpincebras = nh.advertise<std_msgs::Int16>("GripperCommand", 1000);
@@ -737,7 +737,6 @@ int main(int argc, char **argv) {
     State* S1400 = new State(&State1400);
     State* S1500 = new State(&State1500);
     State* S1600 = new State(&State1600);
-    State* S1700 = new State(&State1700);
 
     // On rajoute les transitions vers les états// /// //
 
@@ -767,7 +766,7 @@ int main(int argc, char **argv) {
     S1300->addTransition("reach1300", S1400);
     S1400->addTransition("reach1400", S1500);
     S1500->addTransition("reach1400", S1600);
-    S1600->addTransition("reach1400", S1700);
+    S1600->addTransition("reach1400");
 
 
     // Robot parti
@@ -779,7 +778,7 @@ int main(int argc, char **argv) {
     two->addTransition("two2three",three);
     three->addTransition("three2one",one);*/
     // On instancie la machine d'état finis// //
-    SM maMachine(one);
+    SM maMachine(S100);
 
     // /// /// /// RUN STATE MACHINE// /// /// /// /// 
     for (int cnt = 0; cnt < 10; cnt++) {
@@ -790,6 +789,8 @@ int main(int argc, char **argv) {
         // La classe SM se charge de vérifier les transitions et d'effectuer tous les changements nécessaires à chaque appel de maMachine.run()
         // Avant l'exécution de la fonction cible
     }
-    delete one; delete two; delete three; // On désalloue tout à la fin !
+    delete(S100);    delete(S150);    delete(S200);    delete(S250);    delete(S300);    delete(S400);    delete(S500);    delete(S600);
+    delete(S700);    delete(S800);    delete(S900);    delete(S1000);    delete(S1100);    delete(S1200);    delete(S1200);    delete(S1210);
+    delete(S1220);    delete(S1230);    delete(S1240);    delete(S1300);    delete(S1400);    delete(S1500);    delete(S1600);
     return (0);
 }
