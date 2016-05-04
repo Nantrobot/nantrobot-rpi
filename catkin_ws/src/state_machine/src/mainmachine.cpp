@@ -685,14 +685,14 @@ void State1600(State* S) {
 }
 
 
-int main() {
+int main(int argc, char **argv) {
     //Config ROS
-    ros::init(argc, argv, "display_node");
+    ros::init(argc, argv, "state_machine");
     ros::NodeHandle nh;
-    sub_CapteurFront = nh.subscribe("capteurFront", 1, CapteurFront_Callback);
-    sub_CapteurBack = nh.subscribe("capteurBack", 1, CapteurBack_Callback);
-    sub_Pose = nh.subscribe("Pose", 1, Pose_Callback);
-    sub_Poisson = nh.subscribe("Poisson", 1, Poisson_Callback);
+    ros::Subscriber sub_CapteurFront = nh.subscribe("capteurFront", 1, CapteurFront_Callback);
+    ros::Subscriber sub_CapteurBack = nh.subscribe("capteurBack", 1, CapteurBack_Callback);
+    ros::Subscriber sub_Pose = nh.subscribe("Pose", 1, Pose_Callback);
+    ros::Subscriber sub_Poisson = nh.subscribe("Poisson", 1, Poisson_Callback);
 
     ros::Publisher pubphoto = nh.advertise<std_msgs::Empty>("Photo", 1000);
     ros::Publisher pubcons = nh.advertise<geometry_msg::Point32>("PointCons", 1000);
