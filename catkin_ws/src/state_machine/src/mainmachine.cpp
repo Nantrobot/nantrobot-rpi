@@ -9,6 +9,13 @@
 
 using namespace std;
 
+#include <ros.h>
+#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Point32.h>
+#include <std_msgs/Int16.h>
+#include <std_msgs/String.h>
+#include <std_msgs/Empty.h>
+
 #define Periode 0.01
 #define PasDeplacement 10
 #define TFinPoisson 75 //en sec
@@ -59,7 +66,7 @@ ros::Subscriber sub_CapteurBack = nh.subscribe("capteurBack", 1, CapteurBack_Cal
 ros::Subscriber sub_Pose = nh.subscribe("Pose", 1, Pose_Callback);
 //ros::Subscriber sub_Poisson = nh.subscribe("Poisson", 1, Poisson_Callback);
 
-ros::Publisher pubphoto = nh.advertise<gstd_msgs::Bool>("Photo", 1000);
+ros::Publisher pubphoto = nh.advertise<std_msgs::Empty>("Photo", 1000);
 ros::Publisher pubcons = nh.advertise<geometry_msg::Point32>("PointCons", 1000);
 ros::Publisher pubwavcons = nh.advertise<std_msgs::Point32>("WavConsPosition", 1000);
 ros::Publisher pubbras = nh.advertise<geometry_msgs::Twist>("UarmCommand", 1000);
