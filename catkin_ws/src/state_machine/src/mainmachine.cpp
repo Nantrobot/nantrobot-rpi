@@ -47,10 +47,13 @@ ros::Time last_state; // A chaque noeud on enregistre le temps
 std_msgs::Int16 frontWarning, backWarning;
 geometry_msgs::Point32 pos, cmd_Pose;
 geometry_msgs::Twist cmd_Bras;
+
 int poisson = 0;
 int orientationPince, xBras, yBras;    
 int nb_Poissons = 0;
 bool Depart;
+char depart[] = "depart"; char close[]="close"; char closeMax[] = "closeMax"; char open[] = "open";
+
 ros::Publisher pubphoto, pubcons, pubwavcons, pubbras, pubpince, pubpincebras, pubparasol;
 
 //ros::Subscriber sub_CapteurFront, sub_CapteurBack, sub_Pose, sub_Poisson;
@@ -91,7 +94,7 @@ void State150(State* S){
     cout << "state150" << endl;
     cout << "Sortie de la zone d'obstacle!" << endl;
     
-    pubpince.publish("depart");
+    pubpince.publish(depart);
     //Avancée du robot en L, Thêta
     cmd_Pose.x = PasDeplacement;
     cmd_Pose.y = 10;
@@ -176,7 +179,7 @@ void State300(State* S) {
         ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
     }
     //Fermeture max des pinces pour éviter des dégradations
-    pubpince.publish("closeMax");
+    pubpince.publish(closeMax);
     //Placement face au cube (vue de coté) et déplacement pour les faire tomber
     cmd_Pose.x = PasDeplacement ;
     cmd_Pose.y = (2*3.14/3-pos.y)*180/3.14;
@@ -215,7 +218,7 @@ void State400(State* S) {
         ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
     }
     //On ouvre les pinces
-    pubpince.publish("open");
+    pubpince.publish(open);
     
     // On avance le robot jusqu'à y=1500
     cmd_Pose.x = PasDeplacement ;
@@ -228,7 +231,7 @@ void State400(State* S) {
         ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
     }
     //Fermeture des pinces
-    pubpince.publish("close");
+    pubpince.publish(close);
     S->setTransition("reach400", true); // On modifie les conditions des transitions içi
 }
 void State500(State* S) {
@@ -338,7 +341,7 @@ void State900(State* S) {
     }
 
     //On ouvre les pinces
-    pubpince.publish("open");
+    pubpince.publish(open);
     
     //On recule jusqu'à y=900
     cmd_Pose.x = -PasDeplacement ;
@@ -352,7 +355,7 @@ void State900(State* S) {
         ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
     }
     //Fermeture des pinces
-    pubpince.publish("close");
+    pubpince.publish(close);
     
     S->setTransition("reach900", true); // On modifie les conditions des transitions içi
     
@@ -367,7 +370,7 @@ void State1000(State* S) {
     ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
 
     //Ouverture des pinces
-    pubpince.publish("open");
+    pubpince.publish(open);
     
     //1er coquillage
     cmd_Pose.x = 1250;
@@ -406,7 +409,7 @@ void State1000(State* S) {
                 ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
             }
             //Fermeture des pinces
-            pubpince.publish("close");
+            pubpince.publish(close);
             
             S->setTransition("reach1000", true); // On modifie les conditions des transitions içi
         }
@@ -626,7 +629,7 @@ void State1300(State* S) {
     ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
     
     //Ouverture des pinces
-    pubpince.publish("open");
+    pubpince.publish(open);
     
     //deplacement vers le coquillage (1450,900)
     cmd_Pose.x = 1450;
@@ -635,7 +638,7 @@ void State1300(State* S) {
     pubwavcons.publish(cmd_Pose);
     if (1425<pos.x<1475 && 875<pos.y<925){
         //Fermeture des pinces
-        pubpince.publish("close");
+        pubpince.publish(close);
         S->setTransition("reach1300", true); // On modifie les conditions des transitions içi
     }
 }
