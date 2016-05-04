@@ -46,8 +46,10 @@ ros::Time last_state; // A chaque noeud on enregistre le temps
 
 std_msgs::Int16 frontWarning, backWarning;
 geometry_msgs::Point32 pos, cmd_Pose;
-geometry_msg::Twist cmd_Bras;
-int poisson;
+geometry_msgs::Twist cmd_Bras;
+int poisson = 0;
+int orientationPince, xBras, yBras;    
+int nb_Poissons = 0;
 bool Depart;
 ros::Publisher pubphoto, pubcons, pubwavcons, pubbras, pubpince, pubpincebras, pubparasol;
 
@@ -478,7 +480,7 @@ void State1200(State* S) {
             cmd_Pose.x = (-1)*sens*PasDeplacement ;
             cmd_Pose.y = 0;
             cmd_Pose.z = 1;
-            fin = (100)/PasDeplacement; //avancé à définir selon les photos que l'on veut
+            int fin = (100)/PasDeplacement; //avancé à définir selon les photos que l'on veut
             for (int i=0; i<fin; i++)
             {
                 pubcons.publish(cmd_Pose);
@@ -612,12 +614,12 @@ void State1300(State* S) {
     cmd_Pose.x = 0;
     cmd_Pose.z = 1;
     
-    double theta = atan(double(pos.x-1450)/(pos.y-900))
+    double theta = atan(double(pos.x-1450)/(pos.y-900));
     if (pos.y<=900){
-        cmd.Pose.y = (theta + 3.14/2 - pos.theta)*180/3.14
+        cmd.Pose.y = (theta + 3.14/2 - pos.y)*180/3.14;
     }
     else {
-        cmd_Pose.y = (theta - 3.14/2 - pos.theta)*180/3.14;
+        cmd_Pose.y = (theta - 3.14/2 - pos.y)*180/3.14;
     }
 
     pubcons.publish(cmd_Pose);
@@ -684,9 +686,6 @@ void State1600(State* S) {
 
 
 int main() {
-    int orientationPince, xBras, yBras;    
-    int nb_Poissons = 0;
-
     //Config ROS
     ros::init(argc, argv, "display_node");
     ros::NodeHandle nh;
