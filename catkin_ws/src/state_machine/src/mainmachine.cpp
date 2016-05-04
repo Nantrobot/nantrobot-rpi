@@ -14,6 +14,7 @@ using namespace std;
 #include <geometry_msgs/Point32.h>
 #include <geometry_msgs/Pose2D.h>
 #include <std_msgs/Int16.h>
+#include <std_msgs/Int32.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Empty.h>
 
@@ -44,7 +45,7 @@ Listener listener_Poisson;
 Listener listener_motion;
 */
 
-std_msgs::Int16 frontWarning, backWarning;
+std_msgs::Int32 frontWarning, backWarning;
 geometry_msgs::Point32 cmd_Pose;
 geometry_msgs::Twist cmd_Bras;
 geometry_msgs::Pose2D pos;
@@ -56,11 +57,11 @@ int nb_Poissons = 0;
 
 //ros::Subscriber sub_CapteurFront, sub_CapteurBack, sub_Pose, sub_Poisson;
 
-void CapteurFront_Callback (const std_msgs::Int16& cmd_msg) {
+void CapteurFront_Callback (const std_msgs::Int32& cmd_msg) {
     frontWarning = cmd_msg;
 }
 
-void CapteurBack_Callback (const std_msgs::Int16& cmd_msg) {
+void CapteurBack_Callback (const std_msgs::Int32& cmd_msg) {
     backWarning = cmd_msg;
 }
 
@@ -716,8 +717,8 @@ int main(int argc, char **argv) {
     //Config ROS
     ros::init(argc, argv, "display_node");
     ros::NodeHandle nh;
-    ros::Subscriber sub_CapteurFront = nh.subscribe("capteurFront", 1, CapteurFront_Callback);
-    ros::Subscriber sub_CapteurBack = nh.subscribe("capteurBack", 1, CapteurBack_Callback);
+    ros::Subscriber sub_CapteurFront = nh.subscribe("UltrasonFront", 1, CapteurFront_Callback);
+    ros::Subscriber sub_CapteurBack = nh.subscribe("UltrasonBack", 1, CapteurBack_Callback);
     ros::Subscriber sub_Pose = nh.subscribe("Pose", 1, Pose_Callback);
     ros::Subscriber sub_Poisson = nh.subscribe("Poisson", 1, Poisson_Callback);
 
