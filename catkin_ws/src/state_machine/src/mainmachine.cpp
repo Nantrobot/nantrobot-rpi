@@ -40,7 +40,7 @@ Listener listener_Poisson;
 Listener listener_motion;
 */
 
-ros::Duration TFinPoisson=75; //en sec
+ros::Duration TFinPoisson(75.0); //en sec
 ros::Time begin;
 ros::Time last_state; // A chaque noeud on enregistre le temps
 
@@ -508,7 +508,7 @@ void State1210(State* S) {
     cmd_Bras.linear.x = xBras ;
     cmd_Bras.linear.y = yBras;
     cmd_Bras.linear.z = 0; //à déterminer par test
-    cmd_Bras.angular.x = orientation;
+    cmd_Bras.angular.x = orientationPince;
     cmd_Bras.angular.y = 0;
     cmd_Bras.angular.z = 0;
     pubbras.publish(cmd_Bras);
@@ -519,7 +519,7 @@ void State1210(State* S) {
     cmd_Bras.linear.x = xBras ;
     cmd_Bras.linear.y = yBras;
     cmd_Bras.linear.z = 130; 
-    cmd_Bras.angular.x = orientation;
+    cmd_Bras.angular.x = orientationPince;
     cmd_Bras.angular.y = 0;
     cmd_Bras.angular.z = 0;
     pubbras.publish(cmd_Bras);
@@ -551,7 +551,7 @@ void State1230(State* S) {
     cmd_Bras.linear.x = xBras ;
     cmd_Bras.linear.y = yBras;
     cmd_Bras.linear.z = 0; //à déterminer par test
-    cmd_Bras.angular.x = orientation;
+    cmd_Bras.angular.x = orientationPince;
     cmd_Bras.angular.y = 0;
     cmd_Bras.angular.z = 0;
     pubbras.publish(cmd_Bras);
@@ -562,7 +562,7 @@ void State1230(State* S) {
     cmd_Bras.linear.x = xBras ;
     cmd_Bras.linear.y = yBras;
     cmd_Bras.linear.z = 130; 
-    cmd_Bras.angular.x = orientation;
+    cmd_Bras.angular.x = orientationPince;
     cmd_Bras.angular.y = 0;
     cmd_Bras.angular.z = 0;
     pubbras.publish(cmd_Bras);
@@ -616,7 +616,7 @@ void State1300(State* S) {
     
     double theta = atan(double(pos.x-1450)/(pos.y-900));
     if (pos.y<=900){
-        cmd.Pose.y = (theta + 3.14/2 - pos.y)*180/3.14;
+        cmd_Pose.y = (theta + 3.14/2 - pos.y)*180/3.14;
     }
     else {
         cmd_Pose.y = (theta - 3.14/2 - pos.y)*180/3.14;
@@ -679,7 +679,7 @@ void State1600(State* S) {
     cout << "state1600" << endl;
     cout << "ouverture Parasol" << endl;
     
-    pubparasol.publish();
+    pubparasol.publish(1);
     
     cout << "C'est fini ;)" << endl;
 }
