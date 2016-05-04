@@ -1,3 +1,7 @@
+#include<iostream>
+#include<vector>
+#include<string>
+
 #include "StateMachine.h"
 
 using namespace std;
@@ -59,12 +63,12 @@ void SM::run(void){
                 //////////////////IF YES REFRESH STATE///////////////////
                 (CurrentStatePointer->conditions[it])=false;//reset de la condition
                 CurrentStatePointer=(CurrentStatePointer->followState)[it];
-                noTransition=false;//Achtung ! Les transitions doivent Ítres classÈes par ordre de prioritÈ lors de la construction
+                noTransition=false;//Achtung ! Les transitions doivent √™tres class√©es par ordre de priorit√© lors de la construction
             }
             it++;
     }
     /////////////////////EXECUTE STATE USER-DEFINED FONCTION//////////////////////
-    (CurrentStatePointer->ptfonc)(CurrentStatePointer);//On prend un pointeur sur l'Ètat courant en argument pour
-    //pouvoir modifier les attributs des Ètats dans les procÈdures dÈfinies par l'utilisateur (les conditions notamment)
+    (CurrentStatePointer->ptfonc)(CurrentStatePointer);//On prend un pointeur sur l'√©tat courant en argument pour
+    //pouvoir modifier les attributs des √©tats dans les proc√©dures d√©finies par l'utilisateur (les conditions notamment)
 }
 
