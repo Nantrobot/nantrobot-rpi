@@ -40,10 +40,11 @@ Listener listener_motion;
 
 std_msgs::Int16 frontWarning, backWarning;
 geometry_msgs::Point32 pos, cmd_Pose;
-geometry_msg::Twist cmd_Bras;
+geometry_msgs::Twist cmd_Bras;
 int poisson;
 bool Depart;
 ros::Publisher pubphoto, pubcons, pubwavcons, pubbras, pubpince, pubpincebras, pubparasol;
+ros::Time begin;
 
 //ros::Subscriber sub_CapteurFront, sub_CapteurBack, sub_Pose, sub_Poisson;
 
@@ -72,7 +73,7 @@ void State100(State* S) {
     cout << "pret a partir!" << endl; // Etat initial on attend le signal de depart
     if (Depart) {
          {
-            ros::Time begin = ros::Time::now(); // On initialise le temps de depart
+            begin = ros::Time::now(); // On initialise le temps de depart
             ros::Time last_state = begin; // A chaque noeud on enregistre le temps
             S->setTransition("depart", true); // On modifie les conditions des transitions içi
         }
