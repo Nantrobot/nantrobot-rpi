@@ -782,8 +782,8 @@ int main(int argc, char **argv) {
     S800->addTransition("reach800", S900);
     S900->addTransition("reach900", S1000);
     S1000->addTransition("reach1000", S1100);
-    S1100->addTransition("reach1000", S1200);
-    S1200->addTransition("reach1000", S1300);
+    S1100->addTransition("reach1100", S1200);
+    S1200->addTransition("reach1200", S1300);
 
     S1200->addTransition("reachpoisson", S1210);
     S1210->addTransition("getpoisson", S1220);
@@ -794,8 +794,8 @@ int main(int argc, char **argv) {
 
     S1300->addTransition("reach1300", S1400);
     S1400->addTransition("reach1400", S1500);
-    S1500->addTransition("reach1400", S1600);
-    S1600->addTransition("reach1400", S1700);
+    S1500->addTransition("reach1500", S1600);
+    S1600->addTransition("reach1600", S1700);
 
 
     // Robot parti
