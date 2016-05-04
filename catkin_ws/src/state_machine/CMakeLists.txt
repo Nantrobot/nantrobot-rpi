@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(state machine)
+project(state_machine)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -80,7 +80,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES wavefront
+  LIBRARIES statemachine
   CATKIN_DEPENDS geometry_msgs roscpp
 #  DEPENDS system_lib
 )
@@ -98,7 +98,7 @@ include_directories(
 
 ## Declare a cpp library
 add_library(statemachine src/StateMachine.cpp)
-target_link_libraries(Statemachine)
+target_link_libraries(statemachine)
 
 ## Declare a cpp executable
 add_executable(mainmachine src/mainmachine.cpp)
