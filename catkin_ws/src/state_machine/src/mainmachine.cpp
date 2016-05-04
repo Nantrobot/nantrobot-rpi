@@ -38,58 +38,31 @@ Listener listener_Poisson;
 Listener listener_motion;
 */
 
-//Variables
-int frontWarning, backWarning;
-int poisson = 0;
-int orientationPince, xBras, yBras;    
-int nb_Poissons = 0;
-//ROS variables
-geometry_msgs::Point32 cmd_Pose;
-geometry_msgs::Twist cmd_Bras;
-geometry_msgs::Point32 pos;
+std_msgs::Int16 frontWarning, backWarning;
+geometry_msgs::Point32 pos, cmd_Pose;
+geometry_msg::Twist cmd_Bras;
+int poisson;
+bool Depart;
+ros::Publisher pubphoto, pubcons, pubwavcons, pubbras, pubpince, pubpincebras, pubparasol;
 
-void CapteurFront_Callback (const std_msgs::Int16& cmd_msg){
-    frontWarning=cmd_msg.data;
+//ros::Subscriber sub_CapteurFront, sub_CapteurBack, sub_Pose, sub_Poisson;
+
+void CapteurFront_Callback (const std_msgs::Int16& cmd_msg) {
+    frontWarning = cmd_msg;
 }
 
-void CapteurBack_Callback (const std_msgs::Int16& cmd_msg){
-    backWarning=cmd_msg.data;
+void CapteurBack_Callback (const std_msgs::Int16& cmd_msg) {
+    backWarning = cmd_msg;
 }
 
-void Pose_Callback (const geometry_msgs::Point32& cmd_msg){
-    pos=cmd_msg.data;
+void Pose_Callback (const geometry_msgs::Point32& cmd_msg) {
+    pos = cmd_msg;
 }
 
-void Poisson_Callback (const geometry_msgs::Point32& cmd_msg){
+void Poisson_Callback (const geometry_msgs::Point32& cmd_msg) {
     //A remplir
-    poisson=1;
+    poisson = 1;
 }
-
-
-//Config ROS
-ros::init(argc, argv, "display_node");
-ros::NodeHandle nh;
-ros::Subscriber sub_CapteurFront = nh.subscribe("capteurFront", 1, CapteurFront_Callback);
-ros::Subscriber sub_CapteurBack = nh.subscribe("capteurBack", 1, CapteurBack_Callback);
-ros::Subscriber sub_Pose = nh.subscribe("Pose", 1, Pose_Callback);
-ros::Subscriber sub_Poisson = nh.subscribe("Poisson", 1, Poisson_Callback);
-
-ros::Publisher pubphoto = nh.advertise<std_msgs::Empty>("Photo", 1000);
-ros::Publisher pubcons = nh.advertise<geometry_msgs::Point32>("PointCons", 1000);
-ros::Publisher pubwavcons = nh.advertise<std_msgs::Point32>("WavConsPosition", 1000);
-ros::Publisher pubbras = nh.advertise<geometry_msgs::Twist>("UarmCommand", 1000);
-ros::Publisher pubpince = nh.advertise<std_msgs::String>("FrontPlierCommand", 1000);
-ros::Publisher pubpincebras = nh.advertise<std_msgs::Int16>("GripperCommand", 1000);
-ros::Publisher pubparasol = nh.advertise<std_msgs::Empty>("ParasolCommand", 1000);
-
-
-
-ros::Rate loop_rate(100);
-
-//Configuration environment
-char* pPath;
-pPath = getenv("TEAM");
-if(strcmp(pPath,"purple")==0){
 
 
 // Machine déterministe (plan A)
@@ -136,7 +109,7 @@ void State200(State* S) {
     cmd_Pose.x = PasDeplacement;
     cmd_Pose.y = -10;
     cmd_Pose.z = 1;
-    pubcom.publish(cmd_Pose);
+    pubcons.publish(cmd_Pose);
     ros::Duration(Periode).sleep();
     
     cmd_Pose.x = PasDeplacement;
@@ -157,7 +130,7 @@ void State200(State* S) {
         pubcons.publish(cmd_Pose);
         ros::Duration(Periode).sleep(); // Attend 10ms avant la nouvelle boucle
     }
-    S->setTransition("reach200");
+    S->setTransition("reach200", true);
 }
 
 void State250(State* S) {
@@ -168,7 +141,7 @@ void State250(State* S) {
     cmd_Pose.x = 400;
     cmd_Pose.y = 1000;
     cmd_Pose.z = 0;
-    pubcwavcons.publish(cmd_Pose);
+    pubwavcons.publish(cmd_Pose);
     
     if (350<pos.x<450 && 950<pos.y<1050){
         S->setTransition("reach250", true); // On modifie les conditions des transitions içi
@@ -181,11 +154,11 @@ void State300(State* S) {
     cout << "approche lente et ensuite brutale pour la chute des cubes" << endl;
     // Approche lente en L theta pour se mettre en position
     cmd_Pose.x = PasDeplacement ;
-    cmd_Pose.y = (3.14-pose.theta)*180/3.14;
+    cmd_Pose.y = (3.14-pos.y)*180/3.14;
     cmd_Pose.z = 1;
     pubcons.publish(cmd_Pose);
     ros::Duration(Periode).sleep();
-    /
+    
     cmd_Pose.x = PasDeplacement ;
     cmd_Pose.y = 0;
     cmd_Pose.z = 1;
@@ -198,7 +171,7 @@ void State300(State* S) {
     pubpince.publish("closeMax");
     //Placement face au cube (vue de coté) et déplacement pour les faire tomber
     cmd_Pose.x = PasDeplacement ;
-    cmd_Pose.y = (2*3.14/3-pose.theta)*180/3.14;
+    cmd_Pose.y = (2*3.14/3-pos.y)*180/3.14;
     cmd_Pose.z = 1;
     pubcons.publish(cmd_Pose);
     ros::Duration(Periode).sleep();
@@ -208,7 +181,7 @@ void State300(State* S) {
     cmd_Pose.z = 1;
     for (int i=0; i<19; i++)
     {
-        pubcons.publish(cmd_Posee);
+        pubcons.publish(cmd_Pose);
         ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
     }
     S->setTransition("reach300", true); // On modifie les conditions des transitions içi
@@ -218,7 +191,7 @@ void State400(State* S) {
     cout << "ramassage" << endl;
     // On recule après avoir fait tomber les blocs avec le bon angle
     cmd_Pose.x = -PasDeplacement ;
-    cmd_Pose.y = (2*3.14/3-pose.theta)*180/3.14;
+    cmd_Pose.y = (2*3.14/3-pos.y)*180/3.14;
     cmd_Pose.z = 1;
     pubcons.publish(cmd_Pose);
     ros::Duration(Periode).sleep();
@@ -240,7 +213,7 @@ void State400(State* S) {
     cmd_Pose.x = PasDeplacement ;
     cmd_Pose.y = 0;
     cmd_Pose.z = 1;
-    fin = (1500-pos.y)/PasDeplacement
+    fin = (1500-pos.y)/PasDeplacement;
     for (int i=0; i<fin; i++)
     {
         pubcons.publish(cmd_Pose);
@@ -255,16 +228,16 @@ void State500(State* S) {
     cout << "depart zone d'obstacle" << endl;
     // recule jusqu'à que x soit égale à 450
     cmd_Pose.x = -PasDeplacement ;
-    cmd_Pose.y = (3.14-pose.theta)*180/3.14;
+    cmd_Pose.y = (3.14-pos.y)*180/3.14;
     cmd_Pose.z = 1;
-    pubcom.publish(cmd_Pose);// On publie la commande
+    pubcons.publish(cmd_Pose);// On publie la commande
     ros::Duration(Periode).sleep();
     
     cmd_Pose.x = -PasDeplacement ;
     cmd_Pose.y = 0;
     cmd_Pose.z = 1;
     
-    ifin = (pos.x-450)/PasDeplacement;
+    int fin = (pos.x-450)/PasDeplacement;
     for (int i=0; i<fin; i++)
     {
         pubcons.publish(cmd_Pose);
@@ -272,7 +245,7 @@ void State500(State* S) {
     }
 
     S->setTransition("reach500", true); // On modifie les conditions des transitions içi
-    }
+    
 }
 void State600(State* S) {
     cout << "state600" << endl;
@@ -292,16 +265,16 @@ void State700(State* S) {
     cout << "fermeture des portes" << endl;
     // On s'oriente afin de fermer les portes avec le dos du robot
     cmd_Pose.x = 0 ;
-    cmd_Pose.y = -pose.theta*180/3.14;
+    cmd_Pose.y = -pos.y*180/3.14;
     cmd_Pose.z = 1;
-    pubcom.publish(cmd_Pose);// On publie la commande
+    pubcons.publish(cmd_Pose);// On publie la commande
     ros::Duration(Periode).sleep();
     //On recule
     cmd_Pose.x = -PasDeplacement ;
     cmd_Pose.y = 0;
     cmd_Pose.z = 1;
     
-    fin = (pos.x)/PasDeplacement;
+    int fin = (pos.x)/PasDeplacement;
     for (int i=0; i<fin; i++)
     {
         pubcons.publish(cmd_Pose);
@@ -340,16 +313,16 @@ void State900(State* S) {
     cout << "state900" << endl;
     cout << "tourne, avance puis dépose blocs" << endl;
     cmd_Pose.x = PasDeplacement ;
-    cmd_Pose.y = (3.14/2-pose.theta)*180/3.14;
+    cmd_Pose.y = (3.14/2-pos.y)*180/3.14;
     cmd_Pose.z = 1;
-    pubcom.publish(cmd);// On publie la commande
+    pubcons.publish(cmd_Pose);// On publie la commande
     ros::Duration(Periode).sleep();
     //On avance jusqu'à y=1300
     cmd_Pose.x = PasDeplacement ;
     cmd_Pose.y = 0;
     cmd_Pose.z = 1;
     
-    fin = (1300-pos.y)/PasDeplacement;
+    int fin = (1300-pos.y)/PasDeplacement;
     for (int i=0; i<fin; i++)
     {
         pubcons.publish(cmd_Pose);
@@ -374,13 +347,13 @@ void State900(State* S) {
     pubpince.publish("close");
     
     S->setTransition("reach900", true); // On modifie les conditions des transitions içi
-    }
+    
 }
 void State1000(State* S) {
     cout << "state1000" << endl;
     cout << "Récupération coquillage et déplacement vers les poissons" << endl;
     cmd_Pose.x = 0 ;
-    cmd_Pose.y = (-3.14/6-pose.theta)*180/3.14;
+    cmd_Pose.y = (-3.14/6-pos.y)*180/3.14;
     cmd_Pose.z = 1;
     pubcons.publish(cmd_Pose);
     ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
@@ -403,14 +376,14 @@ void State1000(State* S) {
             cmd_Pose.x = PasDeplacement ;
             cmd_Pose.y = 0;
             cmd_Pose.z = 1;
-            fin = (pos.y-200)/PasDeplacement;
+            int fin = (pos.y-200)/PasDeplacement;
             for (int i=0; i<fin; i++)
             {
                 pubcons.publish(cmd_Pose);
                 ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
             }
             cmd_Pose.x = 0 ;
-            cmd_Pose.y = -pose.theta*180/3.14;
+            cmd_Pose.y = -pos.y*180/3.14;
             cmd_Pose.z = 1;
             pubcons.publish(cmd_Pose);
             ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
@@ -438,7 +411,7 @@ void State1100(State* S) {
     
     //Tourne à pi/5 et avance
     cmd_Pose.x = 0 ;
-    cmd_Pose.y = (3.14/5-pose.theta)*180/3.14;
+    cmd_Pose.y = (3.14/5-pos.y)*180/3.14;
     cmd_Pose.z = 1;
     pubcons.publish(cmd_Pose);
     ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
@@ -446,7 +419,7 @@ void State1100(State* S) {
     cmd_Pose.x = PasDeplacement ;
     cmd_Pose.y = 0;
     cmd_Pose.z = 1;
-    fin = (1850-pos.x)/PasDeplacement;
+    int fin = (1850-pos.x)/PasDeplacement;
     for (int i=0; i<fin; i++)
     {
         pubcons.publish(cmd_Pose);
@@ -455,7 +428,7 @@ void State1100(State* S) {
     
     //Tourne à 4pi/5 et avance
     cmd_Pose.x = 0 ;
-    cmd_Pose.y = (4*3.14/5-pose.theta)*180/3.14;
+    cmd_Pose.y = (4*3.14/5-pos.y)*180/3.14;
     cmd_Pose.z = 1;
     pubcons.publish(cmd_Pose);
     ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
@@ -472,7 +445,7 @@ void State1100(State* S) {
     
      //Tourne à pi/2 et en position pour la recherche de poissons
     cmd_Pose.x = 0 ;
-    cmd_Pose.y = (3.14/2-pose.theta)*180/3.14;
+    cmd_Pose.y = (3.14/2-pos.y)*180/3.14;
     cmd_Pose.z = 1;
     pubcons.publish(cmd_Pose);
     ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
@@ -553,7 +526,7 @@ void State1220(State* S) {
     cmd_Pose.x = PasDeplacement ;
     cmd_Pose.y = 0;
     cmd_Pose.z = 1;
-    fin = (1200-pos.y)/PasDeplacement;
+    int fin = (1200-pos.y)/PasDeplacement;
     for (int i=0; i<fin; i++)
     {
         pubcons.publish(cmd_Pose);
@@ -601,7 +574,7 @@ void State1240(State* S) {
     cmd_Pose.x = -PasDeplacement ;
     cmd_Pose.y = 0;
     cmd_Pose.z = 1;
-    fin = (pos.y-500)/PasDeplacement;
+    int fin = (pos.y-500)/PasDeplacement;
     for (int i=0; i<fin; i++)
     {
         pubcons.publish(cmd_Pose);
@@ -615,7 +588,7 @@ void State1300(State* S) {
     cout << "sortie zone obstacle" << endl; // A voir si on ne peut pas le faire ne 1commande
     //Rotation pour s'écarter du bord
     cmd_Pose.x = 0;
-    cmd_Pose.y = (3.14/2-pose.theta)*180/3.14;
+    cmd_Pose.y = (3.14/2-pos.y)*180/3.14;
     cmd_Pose.z = 1;
     pubcons.publish(cmd_Pose);
     ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
@@ -623,7 +596,7 @@ void State1300(State* S) {
     cmd_Pose.x = -PasDeplacement ;
     cmd_Pose.y = 0;
     cmd_Pose.z = 1;
-    fin = (pos.x-1700)/PasDeplacement;
+    int fin = (pos.x-1700)/PasDeplacement;
     for (int i=0; i<fin; i++)
     {
         pubcons.publish(cmd_Pose);
@@ -676,7 +649,7 @@ void State1500(State* S) {
     cout << "vers l'intérieur de la serviette" << endl; // On va vers une position intermediare pour ne pas pousser les coquillages deposs
     //Rotation pour s'écarter du bord
     cmd_Pose.x = 0;
-    cmd_Pose.y = (-3.14/2-pose.theta)*180/3.14;
+    cmd_Pose.y = (-3.14/2-pos.y)*180/3.14;
     cmd_Pose.z = 1;
     pubcons.publish(cmd_Pose);
     ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
@@ -684,7 +657,7 @@ void State1500(State* S) {
     cmd_Pose.x = PasDeplacement ;
     cmd_Pose.y = 0;
     cmd_Pose.z = 1;
-    fin = (pos.y-25)/PasDeplacement;
+    int fin = (pos.y-25)/PasDeplacement;
     for (int i=0; i<fin; i++)
     {
         pubcons.publish(cmd_Pose);
@@ -705,9 +678,37 @@ void State1600(State* S) {
 
 
 int main() {
+    int orientationPince, xBras, yBras;    
+    int nb_Poissons = 0;
+
+    //Config ROS
+    ros::init(argc, argv, "display_node");
+    ros::NodeHandle nh;
+    sub_CapteurFront = nh.subscribe("capteurFront", 1, CapteurFront_Callback);
+    sub_CapteurBack = nh.subscribe("capteurBack", 1, CapteurBack_Callback);
+    sub_Pose = nh.subscribe("Pose", 1, Pose_Callback);
+    sub_Poisson = nh.subscribe("Poisson", 1, Poisson_Callback);
+
+    ros::Publisher pubphoto = nh.advertise<std_msgs::Empty>("Photo", 1000);
+    ros::Publisher pubcons = nh.advertise<geometry_msg::Point32>("PointCons", 1000);
+    ros::Publisher pubwavcons = nh.advertise<std_msgs::Point32>("WavConsPosition", 1000);
+    ros::Publisher pubbras = nh.advertise<geometry_msgs::Twist>("UarmCommand", 1000);
+    ros::Publisher pubpince = nh.advertise<std_msgs::String>("FrontPlierCommand", 1000);
+    ros::Publisher pubpincebras = nh.advertise<std_msgs::Int16>("GripperCommand", 1000);
+    ros::Publisher pubparasol = nh.advertise<std_msgs::Empty>("ParasolCommand", 1000);
+
+
+
+    ros::Rate loop_rate(100);
+
+    //Configuration environment
+    char* pPath;
+    pPath = getenv("TEAM");
+    if(strcmp(pPath,"purple")==0) {;}
+
     // //BUILD STATE MACHINE// /// /// /// /
 
-    depart du robot!
+    //depart du robot!
     // Les états deterministes
     State* S100 = new State(&State100);
     State* S150 = new State(&State150);
