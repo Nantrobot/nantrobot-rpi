@@ -18,8 +18,10 @@ using namespace std;
 
 #define Periode 0.01
 #define PasDeplacement 10
-#define TFinPoisson 75 //en sec
 #define nbPhotos 5
+
+
+
 
 /*class Listener {
 public : geometry_msgs::Pose2D last_msg_Pose2D;
@@ -37,6 +39,10 @@ Listener listener_Pose;
 Listener listener_Poisson;
 Listener listener_motion;
 */
+
+ros::Duration TFinPoisson=75; //en sec
+ros::Time begin;
+ros::Time last_state; // A chaque noeud on enregistre le temps
 
 std_msgs::Int16 frontWarning, backWarning;
 geometry_msgs::Point32 pos, cmd_Pose;
@@ -72,8 +78,8 @@ void State100(State* S) {
     cout << "pret a partir!" << endl; // Etat initial on attend le signal de depart
     if (Depart) {
          {
-            ros::Time begin = ros::Time::now(); // On initialise le temps de depart
-            ros::Time last_state = begin; // A chaque noeud on enregistre le temps
+            begin = ros::Time::now(); // On initialise le temps de depart
+            last_state = begin; // A chaque noeud on enregistre le temps
             S->setTransition("depart", true); // On modifie les conditions des transitions içi
         }
     }
