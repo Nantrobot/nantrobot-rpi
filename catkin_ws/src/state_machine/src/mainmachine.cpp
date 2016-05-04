@@ -8,6 +8,8 @@
 
 using namespace std;
 
+#define Periode 0.01
+#define PasDeplacement 10
 
 /*class Listener {
 public : geometry_msgs::Pose2D last_msg_Pose2D;
@@ -25,6 +27,20 @@ Listener listener_Pose;
 Listener listener_Poisson;
 Listener listener_motion;
 */
+int frontWarning, backWarning;
+geometry_msg::Point32 pos;
+
+void CapteurFront_Callback (const std_msgs::Int16& cmd_msg){
+    frontWarning=cmd_msg.data;
+}
+
+void CapteurBack_Callback (const std_msgs::Int16& cmd_msg){
+    backWarning=cmd_msg.data;
+}
+
+void Pose_BackCallback (const geometry_msg::Point32& cmd_msg){
+    pos=cmd_msg.data;
+}
 
 //Config ROS
 ros::init(argc, argv, "display_node");
@@ -40,7 +56,7 @@ ros::Publisher pubpince = nh.advertise<std_msgs::String>("FrontPlierCommand", 10
 ros::Publisher pubpincebras = nh.advertise<std_msgs::Int16>("GripperCommand", 1000);
 ros::Publisher pubparasol = nh.advertise<std_msgs::Empty>("ParasolCommand", 1000);
 
-geometry_msg::Point32 cmd_Pos;
+geometry_msg::Point32 cmd_Pose;
 geometry_msg::Twist cmd_Bras;
 
 
@@ -72,17 +88,18 @@ void State150(State* S){
     
     pubpince.publish("depart");
     //Avancée du robot en L, Thêta
-    cmd_Pos.x = 10;
-    cmd_Pos.y = 10;
-    cmd_Pos.z = 1;
-    pubcons.publish(cmd_Pos);
-    cmd_Pos.x = 10;
-    cmd_Pos.y = 0;
-    cmd_Pos.z = 1;
+    cmd_Pose.x = PasDeplacement;
+    cmd_Pose.y = 10;
+    cmd_Pose.z = 1;
+    pubcons.publish(cmd_Pose);
+    ros::Duration(Periode).sleep();
+    cmd_Pose.x = PasDeplacement;
+    cmd_Pose.y = 0;
+    cmd_Pose.z = 1;
     for (int i=0; i<14; i++)
     {
-        pubcons.publish(cmd_Pos);
-        ros::Duration(0.01).sleep(); // Attend 10ms avant la nouvelle boucle
+        pubcons.publish(cmd_Pose);
+        ros::Duration(Periode).sleep(); // Attend 10ms avant la nouvelle boucle
     }
     S->setTransition("reach150", true); // On modifie les conditions des transitions içi
 }
@@ -92,27 +109,29 @@ void State200(State* S) {
     cout << "Poussée premiers cubes de sable!" << endl;
 
     // On commande le robot vers les cubes
-    cmd_Pos.x = 10;
-    cmd_Pos.y = -10;
-    cmd_Pos.z = 1;
-    pubcom.publish(cmd_Pos);
-    cmd_Pos.x = 10;
-    cmd_Pos.y = 0;
-    cmd_Pos.z = 1;
+    cmd_Pose.x = PasDeplacement;
+    cmd_Pose.y = -10;
+    cmd_Pose.z = 1;
+    pubcom.publish(cmd_Pose);
+    ros::Duration(Periode).sleep();
+    
+    cmd_Pose.x = PasDeplacement;
+    cmd_Pose.y = 0;
+    cmd_Pose.z = 1;
     for (int i=0; i<60; i++)
     {
-        pubcons.publish(cmd_Pos);
-        ros::Duration(0.01).sleep(); // Attend 10ms avant la nouvelle boucle
+        pubcons.publish(cmd_Pose);
+        ros::Duration(Periode).sleep(); // Attend 10ms avant la nouvelle boucle
     }
     
     //sortie de la zone d'obstacle
-    cmd_Pos.x = -10;
-    cmd_Pos.y = 0;
-    cmd_Pos.z = 1;
+    cmd_Pose.x = -PasDeplacement;
+    cmd_Pose.y = 0;
+    cmd_Pose.z = 1;
     for (int i=0; i<60; i++)
     {
-        pubcons.publish(cmd_Pos);
-        ros::Duration(0.01).sleep(); // Attend 10ms avant la nouvelle boucle
+        pubcons.publish(cmd_Pose);
+        ros::Duration(Periode).sleep(); // Attend 10ms avant la nouvelle boucle
     }
     S->setTransition("reach200");
 }
@@ -122,113 +141,166 @@ void State250(State* S) {
     cout << "ruée vers le sable!" << endl;
 
     // On commande le robot vers la dune
-    cmd_Pose.x = 450;
-    cmd.y = 130;
-    cmd.z = 0
-    pubcom.publish(cmd);
-
-    poseatteinte = fasle
-    while (!poseatteinte && (ros::Time::now() - last_state) < 10) { // Tant qu'on est pas arrivé et qu'on a pas fait 10s
-        if (listener_motion.last_msg ?? ? ) { // Si le topic motion indique su'on est arrivé
-            poseatteinte = true;
-        }
-        // On indique qu'on est arrivé
-        if (listener_motion.last_msg ?? ? ) { // Si robot detecté
-            ros::Time tempsetat = (ros::Time::now() - last_state); // Temps parcouru par l'état 200
-            if (tempetat < 5 ) {S->setTransition("planC", true); } // Si on voit le robot avant les 5premières secondes (à modifier selon test)
-            if (tempetat < 10 ) {S->setTransition("planB", true); } // Pareil mais 10
-            // Peut etre faire un 4ème cas
-        }
-        ros::Duration(0.1).sleep(); // Attend 100ms avant la nouvelle boucle
-
+    cmd_Pose.x = 400;
+    cmd_Pose.y = 1000;
+    cmd_Pose.z = 0;
+    pubcwavcons.publish(cmd_Pose);
+    
+    if (350<pos.x<450 && 950<pos.y<1050){
+        S->setTransition("reach250", true); // On modifie les conditions des transitions içi
     }
-    S->setTransition("planA", true); // On modifie les conditions des transitions içi
-
 }
 
 void State300(State* S) {
 
     cout << "state300" << endl;
-    cout << "approche lente" << endl;
-    // Approche lente en L theta pour se rapprocher des blocs
-
-    while (!poseatteinte && (ros::Time::now() - last_state) < 3) { // Tant que l'on est pas arrivé et durant au maximum 3s
-        cmd.x = 2 ;
-        cmd.y = 0.2;
-        cmd.z = 1;
-        pubcom.publish(cmd);
-        poseatteinte = true // A remplir si on veut une condition d'arret non temporelle
-        if (robot detecte) {
-            last_state = ros::Time::now()
-                         S->setTransition("robotdetecte300")
-        }
+    cout << "approche lente et ensuite brutale pour la chute des cubes" << endl;
+    // Approche lente en L theta pour se mettre en position
+    cmd_Pose.x = PasDeplacement ;
+    cmd_Pose.y = (3-pose.theta)*180/3.14;
+    cmd_Pose.z = 1;
+    pubcons.publish(cmd_Pose);
+    ros::Duration(Periode).sleep();
+    /
+    cmd_Pose.x = PasDeplacement ;
+    cmd_Pose.y = 0;
+    cmd_Pose.z = 1;
+    for (int i=0; i<19; i++)
+    {
+        pubcons.publish(cmd_Pose);
+        ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
     }
-
+    //Fermeture max des pinces pour éviter des dégradations
+    pubpince.publish("closeMax");
+    //Placement face au cube (vue de coté) et déplacement pour les faire tomber
+    cmd_Pose.x = PasDeplacement ;
+    cmd_Pose.y = (1.8-pose.theta)*180/3.14;
+    cmd_Pose.z = 1;
+    pubcons.publish(cmd_Pose);
+    ros::Duration(Periode).sleep();
+    //déplacement une fois le positionnement terminé
+    cmd_Pose.x = PasDeplacement ;
+    cmd_Pose.y = 0;
+    cmd_Pose.z = 1;
+    for (int i=0; i<19; i++)
+    {
+        pubcons.publish(cmd_Posee);
+        ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
+    }
     S->setTransition("reach300", true); // On modifie les conditions des transitions içi
-
 }
 void State400(State* S) {
     cout << "state400" << endl;
     cout << "ramassage" << endl;
-// Approche lente en L theta pour attrapper des blocs
-    cmd.x = 400 ;
-    cmd.y = 1.7;
-    cmd.z = 1;
-    pubcom.publish(cmd);// On publie la commande
-    if "a completer" {
-
-
-    // On commande le robot vers le blocsdeblocs
-    cmd.x = 900;
-    cmd.y = 2450;
-    cmd.z = 0;
-    pubcom.publish(cmd);
+    // On recule après avoir fait tomber les blocs avec le bon angle
+    cmd_Pose.x = -PasDeplacement ;
+    cmd_Pose.y = (1.8-pose.theta)*180/3.14;
+    cmd_Pose.z = 1;
+    pubcons.publish(cmd_Pose);
+    ros::Duration(Periode).sleep();
+    
+    cmd_Pose.x = -PasDeplacement ;
+    cmd_Pose.y = 0;
+    cmd_Pose.z = 1;
+    
+    int fin = (pos.x-1100)/PasDeplacement;
+    for (int i=0; i<fin; i++)
+    {
+        pubcons.publish(cmd_Pose);
+        ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
     }
-    if "a completer" {
+    //On ouvre les pinces
+    pubpince.publish("open");
+    
+    // On avance le robot jusqu'à y=1500
+    cmd_Pose.x = PasDeplacement ;
+    cmd_Pose.y = 0;
+    cmd_Pose.z = 1;
+    fin = (1500-pos.y)/PasDeplacement
+    for (int i=0; i<fin; i++)
+    {
+        pubcons.publish(cmd_Pose);
+        ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
+    }
+    //Fermeture des pinces
+    pubpince.publish("close");
     S->setTransition("reach400", true); // On modifie les conditions des transitions içi
-    }
 }
 void State500(State* S) {
     cout << "state500" << endl;
-    cout << "tourne blocbloc" << endl;
-    // Tourne sur nous meme avant de pousser le blocsde blocs
-    cmd.x = 0 ;
-    cmd.y = -1.7;
-    cmd.z = 1;
-    pubcom.publish(cmd);// On publie la commande
-
-    if "a completer" {
+    cout << "depart zone d'obstacle" << endl;
+    // recule jusqu'à que x soit égale à 450
+    cmd_Pose.x = -PasDeplacement ;
+    cmd_Pose.y = (3-pose.theta)*180/3.14;
+    cmd_Pose.z = 1;
+    pubcom.publish(cmd_Pose);// On publie la commande
+    ros::Duration(Periode).sleep();
+    
+    cmd_Pose.x = -PasDeplacement ;
+    cmd_Pose.y = 0;
+    cmd_Pose.z = 1;
+    
+    int fin = (pos.x-450)/PasDeplacement;
+    for (int i=0; i<fin; i++)
+    {
+        pubcons.publish(cmd_Pose);
+        ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
+    }
 
     S->setTransition("reach500", true); // On modifie les conditions des transitions içi
     }
 }
 void State600(State* S) {
     cout << "state600" << endl;
-    cout << "pousse blocbloc" << endl;
-    // On pousse le bloc de blocs
-    cmd.x = 400 ;
-    cmd.y = -1.7;
-    cmd.z = 1;
-    pubcom.publish(cmd);// On publie la commande
+    cout << "direction les portes" << endl;
+    //Utilisation du wavcons pour aller en direction des portes
+    cmd_Pose.x = 450 ;
+    cmd_Pose.y = 450;
+    cmd_Pose.z = 0;
+    pubwavcons.publish(cmd_Pose);// On publie la commande
 
-    if "a completer" {
-    S->setTransition("reach600", true); // On modifie les conditions des transitions içi
+    if (425<pos.x<475 && 425<pos.y<475){
+        S->setTransition("reach600", true); // On modifie les conditions des transitions içi
     }
 }
 void State700(State* S) {
     cout << "state700" << endl;
-    cout << "reculage laisse blocs" << endl;
-    // On recule afin de deposer les blocs dans la zone
-    cmd.x = -300 ;
-    cmd.y = -1.7;
-    cmd.z = 1;
-    pubcom.publish(cmd);// On publie la commande
+    cout << "fermeture des portes" << endl;
+    // On s'oriente afin de fermer les portes avec le dos du robot
+    cmd_Pose.x = 0 ;
+    cmd_Pose.y = -pose.theta*180/3.14;
+    cmd_Pose.z = 1;
+    pubcom.publish(cmd_Pose);// On publie la commande
+    ros::Duration(Periode).sleep();
+    //On recule
+    cmd_Pose.x = -PasDeplacement ;
+    cmd_Pose.y = 0;
+    cmd_Pose.z = 1;
+    
+    int fin = (pos.x)/PasDeplacement;
+    for (int i=0; i<fin; i++)
+    {
+        pubcons.publish(cmd_Pose);
+        ros::Duration(Periode).sleep(); // Attend Periode en s avant la nouvelle boucle
+    }
+    S->setTransition("reach700", true); // On modifie les conditions des transitions içi
+}
+
+void State800(State* S) {
+    cout << "state800" << endl;
+    cout << "sortie de la zone d'obstacle" << endl;
+    // On avance de jusqu'à x=300mm
+    cmd.x = 1150;
+    cmd.y = 2450;
+    cmd.z = 0;
+    pubcom.publish(cmd);
 
     if "a completer" {
 
-    S->setTransition("reach700", true); // On modifie les conditions des transitions içi
+    S->setTransition("reach800", true); // On modifie les conditions des transitions içi
     }
 }
+
 void State800(State* S) {
     cout << "state800" << endl;
     cout << "vers coquillage" << endl;
@@ -475,7 +547,9 @@ int main() {
     depart du robot!
     // Les états deterministes
     State* S100 = new State(&State100);
+    State* S150 = new State(&State150);
     State* S200 = new State(&State200);
+    State* S250 = new State(&State250);
     State* S300 = new State(&State300);
     State* S400 = new State(&State400);
     State* S500 = new State(&State500);
